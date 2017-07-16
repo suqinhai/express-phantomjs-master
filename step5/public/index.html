@@ -1,0 +1,117 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>phantomjs</title>
+    <script src="http://cdn.bootcss.com/vue/2.2.1/vue.js"></script>
+    <script src="lib/socket.io.js"></script>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        #main {
+            width: 960px;
+            margin: 20px auto;
+        }
+        .progress-hook{
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main">
+        <!--输入框-->
+        <div>
+            <div class="form-group">
+                <label for="key">keyword</label>
+                <input v-model="key" type="text" class="form-control" id="key" placeholder="输入关键字" />
+            </div>
+            <div class="form-group">
+                <label for="pageNum">page-number</label>
+                <input v-model="pageNum" type="text" class="form-control" id="pageNum" placeholder="输入页数" />
+            </div>
+            <div class="form-group">
+                <label class="checkbox-inline">
+                     <input type="checkbox" id="iphone5" value="iphone5" v-model="devices"> iphone5
+                </label>
+                <label class="checkbox-inline">
+                    <input type="checkbox" id="iphone6" value="iphone6" v-model="devices"> iphone6
+                </label>
+                <label class="checkbox-inline">
+                    <input type="checkbox" id="ipad" value="ipad" v-model="devices"> ipad
+                </label>
+            </div>
+            <button @click="submit" type="submit" class="btn btn-default">Submit</button>
+        </div>
+        <!--进度条-->
+        <div class="progress progress-hook">
+            <div class="progress-bar" :style="{width: percent}">
+                {{percent}}
+            </div>
+        </div>
+        <!--表格呈现-->
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>devive</th>
+                    <th>title</th>
+                    <th>pageNum</th>
+                    <th>info</th>
+                    <th>pic</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(item, index) in data">
+                    <td>{{index+1}}</td>
+                    <td>{{item.device.name}}</td>
+                    <td><a :href="item.link">{{item.title}}</a></td>
+                    <td>{{item.pageNum}}</td>
+                    <td>{{item.info}}</td>
+                    <td><img width=80 height=80 v-if="item.imgId" :src="'./pic/' + item.imgId + '.png'"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <script>
+        new Vue({
+            el : '#main',
+            data : {
+                key : '',
+                pageNum : 1,
+                devices : ['iphone5'],
+                data : [],
+                complishPercentage : 0,
+            },
+            computed : {
+                percent : function(){
+                    return Math.floor(this.complishPercentage * 100) + '%';
+                }
+            },
+            methods : {
+                submit : function(){
+                    this.data = [];
+                    this.complishPercentage = 0;
+                    this.socket.emit('query', {
+                        key : this.key,
+                        pageNum : this.pageNum,
+                        devices : this.devices
+                    });
+                }
+            },
+            created : function(){
+                var me = this;
+                this.socket = io.connect('ws://localhost:8000');
+                this.socket.on('msg', function(data){
+                    var dataList, temp;
+                    me.complishPercentage = data.complishPercentage;
+                    dataList = data.dataList;
+                    while(temp = dataList.shift()){
+                        me.data.push(temp);
+                    }
+                })
+            }
+        })
+    </script>
+</body>
+
+</html>

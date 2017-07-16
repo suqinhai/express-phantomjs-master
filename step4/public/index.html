@@ -1,0 +1,85 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>phantomjs</title>
+    <script src="http://cdn.bootcss.com/vue/2.2.1/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/vue.resource/1.2.1/vue-resource.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        #main {
+            width: 960px;
+            margin: 20px auto;
+        }
+        #load{
+            display:block;
+            margin: 100px auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main">
+        <div id="input">
+            <div class="form-group">
+                <label for="key">keyword</label>
+                <input v-model="key" type="text" class="form-control" id="key" placeholder="输入关键字" />
+            </div>
+            <div class="form-group">
+                <label for="device">device</label>
+                <select class="form-control" id="device" v-model="device">
+                    <option>iphone5</option>
+                    <option>iphone6</option>
+                    <option>ipad</option>
+                </select>
+            </div>
+            <button @click="submit" type="submit" class="btn btn-default">Submit</button>
+        </div>
+        <img id="load" width=200 hieght=200 v-show="loadShow" src="https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=2571806201,434333879&fm=21&gp=0.jpg">
+        <table v-show="tableShow" class="table table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>title</th>
+                    <th>info</th>
+                    <th>pic</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(item, index) in dataList">
+                    <td>{{index+1}}</td>
+                    <td><a :href="item.link">{{item.title}}</a></td>
+                    <td>{{item.info}}</td>
+                    <td><img width=80 height=80 v-if="item.id" :src="'./pic/' + item.id + '.png'"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <script>
+    window.onload=function(){
+        new Vue({
+            el : '#main',
+            data : {
+                loadShow : false,
+                tableShow : false, 
+                key : '',
+                device : 'iphone5',
+                dataList : {}
+            },
+            methods : {
+                submit : function(){
+                    this.loadShow = true;
+                    this.tableShow = false;
+                    this.$http.get('/api', { params : { key : this.key, device : this.device} }).then(function(res){
+                        this.loadShow = false;
+                        this.tableShow = true;
+                        this.dataList = res.body.dataList;
+                    })
+                }
+            }
+        })
+    }
+    </script>
+</body>
+
+</html>
