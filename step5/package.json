@@ -1,0 +1,17 @@
+{
+  "name": "step4",
+  "version": "1.0.0",
+  "description": "phantomjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index"
+  },
+  "author": "zyl",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.14.1",
+    "mongoose": "^4.8.5",
+    "node-uuid": "^1.4.7",
+    "socket.io": "^1.7.3"
+  }
+}
